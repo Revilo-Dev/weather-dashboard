@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import './App.css';
-import { Search } from 'lucide-react';
+import { Search, Building2, Clock } from 'lucide-react';
 
 function App() {
   const [city, setCity] = useState('London');
@@ -151,19 +151,28 @@ function App() {
 
   return (
     <div className={`weather-app ${error ? 'error' : ''}`}>
-      <main>
-        <nav className='fixed flex justify-between items-center'>
-
+      <main className='bg-base-300 w-screen h-screen fixed right-0 top-0 md:p-30 p-10'>
+        <nav className='fixed flex justify-center items-center w-full bg-primary p-4 top-0 right-0 shadow-2xl'>
+        {weatherData && (
+          <div className=" flex gap-1 fixed left-10 font-bold">
+            <Building2 />
+            <figcaption>{weatherData.name}</figcaption>
+          </div>
+        )}
         <div className=' flex justify-center items-center '>
         <form className='flex justify-center items-center gap-2' onSubmit={handleSearch}>
-          <input className='input' id="name" type="text" placeholder="Search city" />
-          <button className='btn' type="submit">
+          <input className='input-primary border-2 p-1 rounded-xl border-text w-70' id="name" type="text" placeholder="Search city" />
+          <button className='btn-dash rounded-lg' type="submit">
             <Search />
           </button>
         </form>
         </div>
-
-          
+        {weatherData && (
+          <div className="flex gap-1 fixed right-10 font-bold">
+            <div id="time">{time}</div>
+            <Clock />
+          </div>
+        )} 
         </nav>
         <br />
         <br />
@@ -175,28 +184,25 @@ function App() {
             <span>{Math.round(weatherData.main.temp)}</span>°C
           </div>
         )}
-        {weatherData && (
-          <div className="gap-20 flex justify-start">
-            <figcaption>{weatherData.name}</figcaption>
-            <div id="time">{time}</div>
-          </div>
-        )}
+
+
         </div>
 
         <div className="description">{weatherData ? weatherData.weather[0].description : ''}</div>
         <div className="grid grid-cols-3 gap-4">
-          <div className='info-chip'><label>Feels like</label><span id="feels-like">{weatherData ? Math.round(weatherData.main.feels_like) : 0}</span>°C</div>
-          <div className='info-chip'><label>Min temp</label><span id="min-temp">{weatherData ? Math.round(weatherData.main.temp_min) : 0}</span>°C</div>
-          <div className='info-chip'><label>Max temp</label><span id="max-temp">{weatherData ? Math.round(weatherData.main.temp_max) : 0}</span>°C</div>
-          <div className='info-chip'><label>Clouds</label><span id="clouds">{weatherData ? weatherData.clouds.all : 0}</span>%</div>
-          <div className='info-chip'><label>Humidity</label><span id="humidity">{weatherData ? weatherData.main.humidity : 0}</span>%</div>
-          <div className='info-chip'><label>Pressure</label><span id="pressure">{weatherData ? weatherData.main.pressure : 0}</span>hPa</div>
+          <div className='info-chip bg-base-100'><p>Feels like</p><span id="feels-like">{weatherData ? Math.round(weatherData.main.feels_like) : 0}</span>°C</div>
+          <div className='info-chip bg-base-100'><p>Min temp</p><span id="min-temp">{weatherData ? Math.round(weatherData.main.temp_min) : 0}</span>°C</div>
+          <div className='info-chip bg-base-100'><p>Max temp</p><span id="max-temp">{weatherData ? Math.round(weatherData.main.temp_max) : 0}</span>°C</div>
+          <div className='info-chip bg-base-100'><p>Clouds</p><span id="clouds">{weatherData ? weatherData.clouds.all : 0}</span>%</div>
+          <div className='info-chip bg-base-100'><p>Humidity</p><span id="humidity">{weatherData ? weatherData.main.humidity : 0}</span>%</div>
+          <div className='info-chip bg-base-100'><p>Pressure</p><span id="pressure">{weatherData ? weatherData.main.pressure : 0}</span>hPa</div>
         </div>
-        <div id="forecast">
+        <br />
+        <div id="forecast" className='flex justify-center items-center gap-2 bg-base-100 rounded-lg p-5'>
           {forecastData && forecastData.map((item, index) => (
-            <div className="hourly-item" key={index}>
-              <span className="hourly-time">{new Date(item.dt * 1000).getHours()}:00</span>
-              <img className="hourly-icon" src={`https://openweathermap.org/img/wn/${item.weather[0].icon}.png`} alt="Hourly Weather Icon" />
+            <div className="hourly-item bg-primary md:w-15 rounded-lg" key={index}>
+              <span className="hourly-time font-bold">{new Date(item.dt * 1000).getHours()}:00</span>
+              <img className="hourly-icon justify-center" src={`https://openweathermap.org/img/wn/${item.weather[0].icon}.png`} alt="Hourly Weather Icon" />
               <span className="hourly-temp">{Math.round(item.main.temp)}°C</span>
             </div>
           ))}

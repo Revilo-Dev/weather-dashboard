@@ -33,9 +33,15 @@ body {
 }
 
 .info-chip {
-  background-color: black;
+  border-radius: 10px;
+  text-wrap: wrap;
+  padding: 20px;
   color: hsl(var(--pc));
   
+}
+
+.info-chip p {
+  font-weight: bolder;
 }
 
 
