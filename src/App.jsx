@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 import { Search, Building2, Clock } from 'lucide-react';
+import ThemeDropdown from './components/ThemeDropDown';
+import useThemeStore from './store/ThemeStore.js';
 
 function App() {
   const [city, setCity] = useState('London');
@@ -8,6 +10,8 @@ function App() {
   const [forecastData, setForecastData] = useState(null);
   const [error, setError] = useState(false);
   const [time, setTime] = useState('');
+  const theme = useThemeStore((state) => state.theme);
+  const setTheme = useThemeStore((state) => state.setTheme);
 
   const id = '7ecc0bbc5c63437f6168a57409c931b3';
   const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?units=metric&appid=${id}`;
@@ -149,64 +153,103 @@ function App() {
     }
   };
 
+  const getWeatherBackground = (weather) => {
+    if (!weather) return 'weather-default';
+
+    const weatherCondition = weather.toLowerCase();
+
+    if (weatherCondition.includes('clear')) {
+      return 'weather-clear';
+    } else if (weatherCondition.includes('clouds')) {
+      return 'weather-clouds';
+    } else if (weatherCondition.includes('rain') || weatherCondition.includes('drizzle')) {
+      return 'weather-rain';
+    } else if (weatherCondition.includes('snow')) {
+      return 'weather-snow';
+    } else if (weatherCondition.includes('thunderstorm')) {
+      return 'weather-thunderstorm';
+    } else {
+      return 'weather-default';
+    }
+  };
+
   return (
-    <div className={`weather-app ${error ? 'error' : ''}`}>
-      <main className='bg-base-300 w-screen h-screen fixed right-0 top-0 md:p-30 p-10'>
+    <div data-theme={theme} className={`weather-app ${error ? 'error' : ''}`}>
+      <main className='bg-base-300 w-screen h-screen fixed right-0 top-0 md:p-30 p-10 overflow-y-auto'>
         <nav className='fixed flex justify-center items-center w-full bg-primary p-4 top-0 right-0 shadow-2xl'>
         {weatherData && (
-          <div className=" flex gap-1 fixed left-10 font-bold">
-            <Building2 />
-            <figcaption>{weatherData.name}</figcaption>
+          <div className="flex gap-1 text-white fixed md:left-10 left-2 font-bold max-sm:hidden">
+          <Building2 />
+          <figcaption>{weatherData.name}</figcaption>
           </div>
+
         )}
         <div className=' flex justify-center items-center '>
-        <form className='flex justify-center items-center gap-2' onSubmit={handleSearch}>
-          <input className='input-primary border-2 p-1 rounded-xl border-text w-70' id="name" type="text" placeholder="Search city" />
-          <button className='btn-dash rounded-lg' type="submit">
+        <form className='flex justify-center items-center gap-2 ' onSubmit={handleSearch}>
+          <input className='input-primary border-2 p-1 AH-Expand text-white rounded-xl border-text md:w-80 sm:w-70' id="name" type="text" placeholder="Search city" />
+          <button className='btn-primary text-white rounded-lg AH-Expand' type="submit">
             <Search />
           </button>
         </form>
         </div>
         {weatherData && (
-          <div className="flex gap-1 fixed right-10 font-bold">
+          <div className="flex md:right-10 text-white gap-1 fixed right-1 font-bold max-sm:hidden">
             <div id="time">{time}</div>
             <Clock />
           </div>
         )} 
-        </nav>
-        <br />
-        <br />
-        <div className='flex justify-center items-center gap-2'>
 
+        <div className='fixed left-1 bottom-1 md:bottom-10 md:left-10'>
+          <ThemeDropdown setTheme={setTheme} />
+        </div>
+        </nav>
         {weatherData && (
-          <div className="">
-            <img src={`https://openweathermap.org/img/wn/${weatherData.weather[0].icon}@4x.png`} alt="Weather Icon" />
-            <span>{Math.round(weatherData.main.temp)}</span>°C
+          <div className={`flex justify-between items-center animated-gradient md:mt-5 mt-20 ${getWeatherBackground(weatherData.weather[0].main)} w-full h-60 rounded-2xl p-6`}>
+            <span className='font-bold text-5xl text-white '>{Math.round(weatherData.main.temp)}°C</span>
+            <div className="description text-white text-2xl font-bold hidden sm:block">{weatherData.weather[0].description}</div>
+            <img className="w-30" src={`https://openweathermap.org/img/wn/${weatherData.weather[0].icon}@4x.png`} alt="Weather Icon" />
           </div>
         )}
 
-
-        </div>
-
-        <div className="description">{weatherData ? weatherData.weather[0].description : ''}</div>
-        <div className="grid grid-cols-3 gap-4">
-          <div className='info-chip bg-base-100'><p>Feels like</p><span id="feels-like">{weatherData ? Math.round(weatherData.main.feels_like) : 0}</span>°C</div>
-          <div className='info-chip bg-base-100'><p>Min temp</p><span id="min-temp">{weatherData ? Math.round(weatherData.main.temp_min) : 0}</span>°C</div>
-          <div className='info-chip bg-base-100'><p>Max temp</p><span id="max-temp">{weatherData ? Math.round(weatherData.main.temp_max) : 0}</span>°C</div>
-          <div className='info-chip bg-base-100'><p>Clouds</p><span id="clouds">{weatherData ? weatherData.clouds.all : 0}</span>%</div>
-          <div className='info-chip bg-base-100'><p>Humidity</p><span id="humidity">{weatherData ? weatherData.main.humidity : 0}</span>%</div>
-          <div className='info-chip bg-base-100'><p>Pressure</p><span id="pressure">{weatherData ? weatherData.main.pressure : 0}</span>hPa</div>
-        </div>
         <br />
-        <div id="forecast" className='flex justify-center items-center gap-2 bg-base-100 rounded-lg p-5'>
-          {forecastData && forecastData.map((item, index) => (
-            <div className="hourly-item bg-primary md:w-15 rounded-lg" key={index}>
-              <span className="hourly-time font-bold">{new Date(item.dt * 1000).getHours()}:00</span>
-              <img className="hourly-icon justify-center" src={`https://openweathermap.org/img/wn/${item.weather[0].icon}.png`} alt="Hourly Weather Icon" />
-              <span className="hourly-temp">{Math.round(item.main.temp)}°C</span>
+
+        {weatherData && (
+          <>
+          <div className='grid grid-cols-2 gap-4 pb-4 sm:hidden'>
+            <div className='info-chip AH-Expand bg-base-100 flex-col flex justify-center items-center'>
+              <Building2 />
+              <figcaption>{weatherData.name}</figcaption>
             </div>
-          ))}
-        </div>
+            <div className='info-chip AH-Expand bg-base-100 flex-col flex justify-center items-center'>
+              <Clock />
+              <div id="time">{time}</div>
+            </div>
+
+          </div>
+            <div className="grid sm:grid-cols-3 grid-cols-2 gap-4">
+              <div className='info-chip bg-base-100 AH-Expand'><p>Feels like</p><span id="feels-like">{Math.round(weatherData.main.feels_like)}</span>°C</div>
+              <div className='info-chip bg-base-100 AH-Expand'><p>Min temp</p><span id="min-temp">{Math.round(weatherData.main.temp_min)}</span>°C</div>
+              <div className='info-chip bg-base-100 AH-Expand'><p>Max temp</p><span id="max-temp">{Math.round(weatherData.main.temp_max)}</span>°C</div>
+              <div className='info-chip bg-base-100 AH-Expand'><p>Clouds</p><span id="clouds">{weatherData.clouds.all}</span>%</div>
+              <div className='info-chip bg-base-100 AH-Expand'><p>Humidity</p><span id="humidity">{weatherData.main.humidity}</span>%</div>
+              <div className='info-chip bg-base-100 AH-Expand'><p>Pressure</p><span id="pressure">{weatherData.main.pressure}</span>hPa</div>
+            </div>
+            <br />
+            <div id="forecast" className='flex shrink sm:justify-center items-center lg:gap-5 gap-2 bg-base-100 rounded-lg p-5 overflow-x-auto'>
+              {forecastData && forecastData.map((item, index) => (
+                <div className="flex AH-Expand  flex-col items-center bg-primary lg:w-20 md:w-15 sm:w-30 min-w-10 rounded-lg" key={index}>
+                  <span className="hourly-time text-white font-bold">{new Date(item.dt * 1000).getHours()}:00</span>
+                  <img className="hourly-icon justify-center" src={`https://openweathermap.org/img/wn/${item.weather[0].icon}.png`} alt="Hourly Weather Icon" />
+                  <span className="hourly-temp text-white">{Math.round(item.main.temp)}°C</span>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+    <div className=" TransparentUI bottom-0 h-30 w-full text-neutral-content p-4">
+        <div className='text-center text-primary' ><a href='https://revilodev.com/'><p className='AH-Expand hover:text-primary' >© Revilo.Dev 2025-2026</p></a></div>
+     </div>
       </main>
     </div>
   );
